@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- I colori veri li mette Compose: qui basta un tema scuro di base,
+         altrimenti all'avvio la finestra lampeggia bianca. -->
+    <style name="Theme.Filo" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/sfondo</item>
+    </style>
+
+    <!-- Le due attivita' senza faccia: nessuna finestra, nessuna animazione.
+         Servono solo a prendere il fuoco per un istante, perche' senza fuoco
+         Android non lascia leggere ne' scrivere gli appunti. -->
+    <style name="Theme.Filo.Invisibile" parent="android:Theme.Translucent.NoTitleBar">
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+</resources>

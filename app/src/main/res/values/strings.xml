@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Filo</string>
+    <string name="manda_al_pc">Manda al PC</string>
+    <string name="canale_ponte">Collegamento col PC</string>
+    <string name="canale_trasferimenti">Cose che passano</string>
+</resources>

@@ -1,0 +1,14 @@
+# Roba che si rigenera a ogni compilazione
+build/
+.gradle/
+local.properties
+*.apk
+*.iml
+.idea/
+.DS_Store
+
+# Chiave di firma e relativa password: non vanno versionate. Servono a
+# firmare gli aggiornamenti e devono restare invariate, altrimenti l'APK non
+# si installa sopra a una versione precedente.
+filo.jks
+.chiave-password.txt

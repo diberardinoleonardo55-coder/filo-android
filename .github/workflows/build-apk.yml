@@ -1,0 +1,80 @@
+name: Build APK
+
+# Eseguito a ogni push e avviabile manualmente.
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # Necessario per pubblicare la release con l'APK.
+    permissions:
+      contents: write
+
+    steps:
+      - name: Scarica il codice
+        uses: actions/checkout@v4
+
+      - name: JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Android SDK e licenze
+        uses: android-actions/setup-android@v3
+
+      # Gradle fornito dall'action: il repository non contiene gradle-wrapper.jar.
+      - name: Gradle 8.7
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      # La chiave di firma proviene dai segreti del repository e deve restare
+      # invariata: Android rifiuta un aggiornamento firmato con una chiave
+      # diversa da quella dell'applicazione installata.
+      - name: Tira fuori la chiave di firma
+        env:
+          CHIAVE_JKS: ${{ secrets.CHIAVE_JKS }}
+        run: |
+          if [ -z "$CHIAVE_JKS" ]; then
+            echo "Segreto CHIAVE_JKS assente: l'APK verrebbe firmato con una"
+            echo "chiave diversa a ogni esecuzione e non sarebbe aggiornabile."
+            exit 1
+          fi
+          echo "$CHIAVE_JKS" | base64 -d > "$RUNNER_TEMP/filo.jks"
+
+      - name: Compila l'APK firmato
+        env:
+          CHIAVE_FILE: ${{ runner.temp }}/filo.jks
+          CHIAVE_PASSWORD: ${{ secrets.CHIAVE_PASSWORD }}
+        run: gradle assembleRelease --stacktrace
+
+      - name: Controlla con che chiave e' firmato
+        run: |
+          ls -lh app/build/outputs/apk/release/
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort | tail -1)
+          "$APKSIGNER" verify --print-certs app/build/outputs/apk/release/app-release.apk | grep -i sha-256 || true
+
+      - name: Pubblica l'APK come artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: filo-apk
+          path: app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      # L'artifact e' un archivio allegato all'esecuzione; la release fornisce
+      # invece un collegamento diretto e stabile al file .apk.
+      - name: Pubblica l'APK come release scaricabile
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk filo.apk
+          gh release delete apk-latest --yes --cleanup-tag || true
+          gh release create apk-latest filo.apk \
+            --title "APK piu recente" \
+            --notes "Build ${{ github.run_number }} del commit ${{ github.sha }}"
