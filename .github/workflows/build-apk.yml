@@ -18,6 +18,11 @@ jobs:
       - name: Scarica il codice
         uses: actions/checkout@v4
 
+      # Il compilatore non vede una chiave di traduzione scritta male: t()
+      # accetta qualsiasi stringa e restituisce la chiave quando non la trova.
+      - name: Controlla le traduzioni
+        run: python3 strumenti/controlla_testi.py
+
       - name: JDK 17
         uses: actions/setup-java@v4
         with:

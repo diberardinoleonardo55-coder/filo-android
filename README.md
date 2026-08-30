@@ -1,79 +1,95 @@
 <h1 align="center">Filo — Android</h1>
 
 <p align="center">
-  <b>Trasferimento diretto di file, immagini e testo fra i dispositivi di una rete locale.</b><br>
-  Nessun servizio esterno, nessun account: i dispositivi comunicano<br>
-  direttamente sulla rete locale o tramite cavo USB.
+  <b>Direct transfer of files, images and text between devices on a local network.</b><br>
+  No external service, no account: devices talk to each other<br>
+  over the local network or through a USB cable.
 </p>
 
 <p align="center">
   <a href="https://github.com/diberardinoleonardo55-coder/filo-android/releases/tag/apk-latest">
-    <b>Scarica l'APK</b>
+    <b>Download the APK</b>
   </a>
   &nbsp;·&nbsp;
-  <a href="https://github.com/diberardinoleonardo55-coder/filo-pc">Versione per Windows</a>
+  <a href="https://github.com/diberardinoleonardo55-coder/filo-pc">Windows version</a>
 </p>
 
 <p align="center">
-  <img src="doc/icona.png" width="480" alt="Le misure contenute nell'icona">
+  <img src="doc/icona.png" width="480" alt="The sizes held in the icon">
 </p>
 
 ---
 
-## Descrizione
+## Overview
 
-Applicazione Android del progetto
-**[filo-pc](https://github.com/diberardinoleonardo55-coder/filo-pc)**. Le due
-implementazioni usano lo stesso protocollo e non hanno ruoli distinti: ogni
-dispositivo accetta connessioni e ne effettua, quindi puo' essere abbinato a un
-computer, a un altro dispositivo Android o a piu' dispositivi insieme,
-selezionando di volta in volta il destinatario.
+The Android application of the
+**[filo-pc](https://github.com/diberardinoleonardo55-coder/filo-pc)** project.
+The two implementations speak the same protocol and have no distinct roles:
+every device both accepts connections and makes them, so it can be paired with
+a computer, with another Android device, or with several devices at once,
+picking the recipient each time.
 
-| Direzione | Modalita' |
+| Direction | How |
 |---|---|
-| invio di file | *Condividi → Filo* da qualsiasi applicazione, oppure *Manda file* |
-| invio di testo | *Manda gli appunti*, o il riquadro nelle impostazioni rapide |
-| ricezione di file | salvataggio automatico: immagini in `Immagini/Filo`, video in `Film/Filo`, altro in `Download/Filo` |
-| ricezione di testo | notifica con azione **Copia** |
-| richiesta di appunti | notifica con azione **Manda** |
+| sending files | *Share → Filo* from any application, or *Send files* |
+| sending text | *Send clipboard*, or the quick-settings tile |
+| receiving files | saved automatically: images in `Pictures/Filo`, video in `Movies/Filo`, everything else in `Download/Filo` |
+| receiving text | notification with a **Copy** action |
+| clipboard request | notification with a **Send** action |
 
-Kotlin e Jetpack Compose. Nessuna libreria di rete: `HttpsURLConnection`,
-`SSLServerSocket` e `DatagramSocket`.
+Kotlin and Jetpack Compose. No networking library: `HttpsURLConnection`,
+`SSLServerSocket` and `DatagramSocket`.
+
+The interface is in English, with Italian selectable from the menu; see
+[Language](#language).
 
 ---
 
-## Vista a costellazione
+## Constellation view
 
-In cima alla schermata il dispositivo locale e' al centro, i dispositivi
-abbinati intorno, rappresentati da un monitor o da un telefono secondo il tipo;
-da ognuno parte un filo verso il centro. La vista e' la stessa
-dell'implementazione per Windows:
+At the top of the screen the local device sits at the centre, the paired
+devices around it, drawn as a monitor or a phone according to their kind; a
+thread runs from each of them to the centre. The view is the same as in the
+Windows implementation:
 
 <p align="center">
-  <img src="doc/costellazione.png" width="430" alt="Vista a costellazione, nella versione per Windows">
+  <img src="doc/costellazione.png" width="430" alt="Constellation view, in the Windows version">
 </p>
 
-<p align="center"><i>(immagine ripresa dalla versione per Windows; su Android il layout e' verticale)</i></p>
+<p align="center"><i>(image taken from the Windows version; on Android the layout is vertical)</i></p>
 
-| Stato del filo | Significato |
+| State of the thread | Meaning |
 |---|---|
-| spento, con ampia curvatura | dispositivo non raggiungibile |
-| acceso, con un punto in movimento | raggiungibile e inattivo |
-| teso, illuminato in proporzione | trasferimento in corso |
+| dim, with a wide bow | device unreachable |
+| lit, with a moving dot | reachable and idle |
+| taut, lit in proportion | transfer in progress |
 
-La direzione del movimento indica il verso del trasferimento; ogni filo ha il
-proprio avanzamento, quindi piu' trasferimenti sono visibili contemporaneamente.
+The direction of movement shows the direction of the transfer; each thread
+carries its own progress, so several transfers are visible at once.
 
-Il tocco su una figura o sul suo filo seleziona il destinatario, riportato nelle
-etichette dei pulsanti sottostanti.
+Touching a figure or its thread selects the recipient, whose name then appears
+in the labels of the buttons below.
 
 ---
 
-## Lato server
+## Language
 
-**[`Servitore.kt`](app/src/main/java/it/leo/filo/Servitore.kt)** implementa gli
-stessi otto endpoint del lato Python, quindi chi effettua la chiamata non
-distingue il tipo di dispositivo che risponde.
+The interface starts in English. Italian is selectable from **⋯ → Language**,
+and the choice is stored in the preferences, so it survives a restart.
+
+Source strings are English and double as the lookup key, so a missing
+translation leaves the English sentence rather than a hole. The compiler cannot
+catch a mistyped key — `t()` accepts any string and returns the key when it
+finds nothing — so `strumenti/controlla_testi.py` compares the keys used in the
+sources against the dictionary, and runs on every build.
+
+---
+
+## The server side
+
+**[`Servitore.kt`](app/src/main/java/it/leo/filo/Servitore.kt)** implements the
+same eight endpoints as the Python side, so a caller cannot tell what kind of
+device is answering.
 
 ```
 GET  /chi              POST /abbina           GET  /eventi?dopo=N
@@ -81,70 +97,69 @@ GET  /scarica/<id>     POST /consegnato/<id>  POST /carica
 POST /appunti          POST /prendi-appunti
 ```
 
-L'implementazione HTTP e' minimale: le richieste provengono da un solo
-protocollo noto e ogni risposta chiude la connessione (`Connection: close`),
-evitando la gestione del riuso.
+The HTTP implementation is deliberately minimal: requests come from one known
+protocol and every response closes the connection (`Connection: close`), which
+avoids having to handle reuse.
 
-**[`Identita.kt`](app/src/main/java/it/leo/filo/Identita.kt)** genera il
-certificato. Una chiave creata nell'AndroidKeyStore viene generata insieme a un
-certificato autofirmato, sufficiente allo scopo senza dipendenze di
-crittografia; la chiave privata non e' esportabile e viene usata solo per
-firmare.
+**[`Identita.kt`](app/src/main/java/it/leo/filo/Identita.kt)** produces the
+certificate. A key created in the AndroidKeyStore is generated together with a
+self-signed certificate, enough for the purpose without a crypto dependency;
+the private key is not exportable and is used only for signing.
 
-Se la generazione non riesce l'applicazione continua a funzionare come client e
-la schermata di abbinamento lo segnala, indicando di avviare l'abbinamento
-dall'altro dispositivo.
-
----
-
-## Scelte di progetto
-
-**1. Richieste con `dopo=0`.**
-Le voci gia' ritirate vengono rimosse dal mittente alla conferma, quindi non
-serve mantenere un contatore e il riavvio di un dispositivo non comporta
-perdite. Quando un ritiro fallisce la voce viene riproposta subito: la pausa di
-cinque secondi in `PonteService` evita il ciclo a vuoto.
-
-**2. Verifica per impronta.**
-Il controllo del nome host e' disattivato perche' il certificato riporta `Filo`
-e non l'indirizzo, che varia. Le impronte accettate sono due, quella dichiarata
-e quella osservata al primo collegamento: un intermediario che ispeziona il
-traffico TLS presenta un certificato rigenerato.
-
-**3. L'indirizzo non identifica il dispositivo.**
-Quando un dispositivo non risponde piu' viene ripetuta la scoperta e si accetta
-il primo con l'impronta corrispondente, aggiornando l'indirizzo memorizzato.
-
-**4. Loopback solo per i dispositivi di tipo PC.**
-Un computer puo' esporre la propria porta sul dispositivo tramite `adb reverse`;
-per un dispositivo Android l'indirizzo 127.0.0.1 corrisponderebbe a se' stesso.
+If generation fails the application still works as a client, and the pairing
+screen says so, pointing out that pairing must be started from the other
+device.
 
 ---
 
-## Accesso agli appunti
+## Design decisions
 
-Da Android 10 un'applicazione in secondo piano non puo' leggere ne' scrivere gli
-appunti: e' una limitazione di sistema, senza permesso associato, valida per
-tutte le applicazioni che non sono la tastiera predefinita.
+**1. Requests with `dopo=0`.**
+Entries already collected are removed by the sender on confirmation, so no
+counter has to be kept and restarting a device loses nothing. When a pick-up
+fails the entry is offered again immediately: the five-second pause in
+`PonteService` keeps that from spinning.
 
-[`AppuntiActivity`](app/src/main/java/it/leo/filo/AppuntiActivity.kt) e'
-un'attivita' senza interfaccia che viene aperta, ottiene il fuoco, opera sugli
-appunti e termina. E' usata dal riquadro delle impostazioni rapide e dalle
-azioni delle notifiche. L'operazione avviene in `onWindowFocusChanged` e non in
-`onResume`, perche' il fuoco arriva successivamente.
+**2. Verification by fingerprint.**
+Host name checking is off because the certificate carries `Filo` and not the
+address, which changes. Two fingerprints are accepted, the declared one and the
+one observed on the first connection: an intermediary that inspects TLS traffic
+presents a regenerated certificate.
+
+**3. The address does not identify the device.**
+When a device stops answering, discovery runs again and the first one with a
+matching fingerprint is accepted, updating the stored address.
+
+**4. Loopback only for devices of type PC.**
+A computer can expose its port on the device through `adb reverse`; for an
+Android device 127.0.0.1 would be itself.
 
 ---
 
-## Note tecniche
+## Clipboard access
+
+Since Android 10 an application in the background can neither read nor write
+the clipboard: it is a system restriction with no permission attached, and it
+applies to every application that is not the default keyboard.
+
+[`AppuntiActivity`](app/src/main/java/it/leo/filo/AppuntiActivity.kt) is an
+activity with no interface that is opened, takes focus, operates on the
+clipboard and finishes. It is used by the quick-settings tile and by the
+notification actions. The work happens in `onWindowFocusChanged` and not in
+`onResume`, because focus arrives later.
+
+---
+
+## Technical notes
 
 <details>
-<summary><b>Permessi sugli Uri condivisi</b></summary>
+<summary><b>Permissions on shared Uris</b></summary>
 
 <br>
 
-Il permesso di lettura concesso da chi condivide segue `intent.data` e la
-`ClipData`, non gli extra: passando gli Uri solo negli extra il contenuto non e'
-leggibile. Vedi `PonteService.mandaRoba()`.
+The read permission granted by the sharing application follows `intent.data`
+and the `ClipData`, not the extras: passing the Uris in the extras alone leaves
+the content unreadable. See `PonteService.mandaRoba()`.
 
 </details>
 
@@ -153,88 +168,89 @@ leggibile. Vedi `PonteService.mandaRoba()`.
 
 <br>
 
-Dalla API 34 solleva un'eccezione: va usata la variante con `PendingIntent`.
-Vedi `Riquadro.onClick()`.
+From API 34 it throws: the `PendingIntent` variant must be used instead. See
+`Riquadro.onClick()`.
 
 </details>
 
 <details>
-<summary><b>Invio di file di grandi dimensioni</b></summary>
+<summary><b>Sending large files</b></summary>
 
 <br>
 
-Senza `setFixedLengthStreamingMode` o `setChunkedStreamingMode`,
-`HttpURLConnection` mantiene in memoria l'intero corpo prima dell'invio.
+Without `setFixedLengthStreamingMode` or `setChunkedStreamingMode`,
+`HttpURLConnection` keeps the whole body in memory before sending it.
 
 </details>
 
 <details>
-<summary><b><code>IS_PENDING</code> durante la scrittura</b></summary>
+<summary><b><code>IS_PENDING</code> while writing</b></summary>
 
 <br>
 
-Senza questo flag il file compare nella galleria prima del completamento del
-trasferimento.
+Without this flag the file shows up in the gallery before the transfer has
+finished.
 
 </details>
 
 <details>
-<summary><b>Tipo MIME dei file ricevuti</b></summary>
+<summary><b>MIME type of received files</b></summary>
 
 <br>
 
-Il tipo dichiarato dal mittente e' spesso `application/octet-stream`, che
-porterebbe le immagini nella cartella dei download: `indovinaMime()` deduce il
-tipo dall'estensione del nome.
+The type declared by the sender is often `application/octet-stream`, which
+would put images in the downloads folder: `indovinaMime()` works the type out
+from the file name extension.
 
 </details>
 
 <details>
-<summary><b>Valori catturati in un ciclo di animazione</b></summary>
+<summary><b>Values captured in an animation loop</b></summary>
 
 <br>
 
-Il ciclo `withFrameNanos` viene avviato una sola volta: leggendo direttamente i
-parametri della composizione resterebbero quelli del primo fotogramma. Serve
-`rememberUpdatedState`.
+The `withFrameNanos` loop is started once: reading composition parameters
+directly would keep the values of the first frame. `rememberUpdatedState` is
+needed.
 
 </details>
 
 ---
 
-## Struttura
+## Layout
 
-| file | contenuto |
+| file | contents |
 |---|---|
-| `Servitore.kt` | server HTTP: lato che risponde |
-| `Rete.kt` | lato che effettua le chiamate |
-| `Identita.kt` | identificativo, nome e certificato del dispositivo |
-| `Compagni.kt` | registro dei dispositivi abbinati, token e impronte |
-| `CodaUscita.kt` | code di uscita per destinatario, con attesa lunga |
-| `Scoperta.kt` | scoperta e risposta via broadcast UDP |
-| `PonteService.kt` | servizio in primo piano: un thread per dispositivo, piu' il server |
-| `Costellazione.kt` | vista a costellazione: fili, figure, selezione |
-| `Salvataggio.kt` | scrittura dei file ricevuti tramite MediaStore |
-| `AppuntiActivity.kt` | attivita' senza interfaccia per gli appunti |
-| `CondividiActivity.kt` | voce nel menu Condividi di sistema |
-| `Riquadro.kt` | riquadro nelle impostazioni rapide |
+| `Servitore.kt` | HTTP server: the side that answers |
+| `Rete.kt` | the side that makes the calls |
+| `Identita.kt` | device id, name and certificate |
+| `Compagni.kt` | register of paired devices, tokens and fingerprints |
+| `CodaUscita.kt` | outgoing queues per recipient, with long polling |
+| `Scoperta.kt` | discovery and reply over UDP broadcast |
+| `PonteService.kt` | foreground service: one thread per device, plus the server |
+| `Costellazione.kt` | constellation view: threads, figures, selection |
+| `Salvataggio.kt` | writing received files through MediaStore |
+| `Testi.kt` | interface language and the Italian dictionary |
+| `AppuntiActivity.kt` | interface-less activity for the clipboard |
+| `CondividiActivity.kt` | entry in the system Share menu |
+| `Riquadro.kt` | quick-settings tile |
 
 ---
 
-## Compilazione
+## Building
 
-L'APK viene prodotto da GitHub Actions a ogni push, come artifact e come release
-`apk-latest`, che fornisce un collegamento stabile al file.
+The APK is produced by GitHub Actions on every push, both as an artifact and as
+the `apk-latest` release, which gives a stable link to the file.
 
-La chiave di firma proviene dai segreti del repository (`CHIAVE_JKS`,
-`CHIAVE_PASSWORD`) e deve restare invariata: Android rifiuta un aggiornamento
-firmato con una chiave diversa da quella dell'applicazione installata. Il
-`versionCode` deriva dal numero di esecuzione della build.
+The signing key comes from the repository secrets (`CHIAVE_JKS`,
+`CHIAVE_PASSWORD`) and must stay the same: Android refuses an update signed
+with a key different from the installed application's. The `versionCode` comes
+from the build run number.
 
-In locale servono JDK 17, Android SDK 34 e Gradle 8.7:
+Locally you need JDK 17, Android SDK 34 and Gradle 8.7:
 
 ```bash
 gradle assembleRelease
 ```
 
-Senza i segreti l'APK viene prodotto non firmato.
+Without the secrets the APK is produced unsigned.

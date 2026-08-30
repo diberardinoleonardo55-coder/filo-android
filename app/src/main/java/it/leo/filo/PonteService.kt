@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import java.io.File
 import java.util.concurrent.Executors
+import it.leo.filo.Testi.t
 
 /**
  * Lo stato del ponte, in chiaro per la UI.
@@ -153,6 +154,7 @@ class PonteService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
+        Testi.collega(this)
         super.onCreate()
         Notifiche.prepara(this)
         startForeground(Notifiche.ID_PONTE, Notifiche.ponte(this, "in ascolto"))
@@ -266,7 +268,7 @@ class PonteService : Service() {
     private fun ritira(compagno: Compagni.Compagno, voce: Rete.Voce): Boolean = when (voce.tipo) {
         "testo" -> {
             val testo = voce.testo ?: ""
-            Diario.annota(this, false, "Testo da ${compagno.nome}", testo.take(90))
+            Diario.annota(this, false, t("Text from {peer}", "peer" to compagno.nome), testo.take(90))
             if (voce.richiesto) {
                 // L'hai chiesto tu un istante fa dall'app: se l'app è ancora
                 // davanti, questa apre il ponte invisibile e copia subito. Se
@@ -309,10 +311,15 @@ class PonteService : Service() {
         }
         StatoPonte.finePassaggio(compagno.id)
         return if (salvato == null) {
-            Diario.annota(this, false, "Non riesco a salvare ${voce.nome}")
+            Diario.annota(this, false, t("Cannot save {name}", "name" to voce.nome))
             false
         } else {
-            Diario.annota(this, false, "${voce.nome} ← ${compagno.nome}", salvato.dove)
+            Diario.annota(
+                this,
+                false,
+                t("{name} ← {peer}", "name" to voce.nome, "peer" to compagno.nome),
+                salvato.dove,
+            )
             Notifiche.fileArrivato(this, voce.nome, salvato.dove, salvato.uri, voce.mime)
             Rete.conferma(this, compagno, voce.id)
             true
@@ -327,10 +334,10 @@ class PonteService : Service() {
             // Prima si prova a spingerlo: se risponde adesso, arriva adesso.
             // Se non risponde resta in coda e se lo prenderà quando torna.
             if (Rete.spingiTesto(this, compagno, testo)) {
-                Diario.annota(this, true, "Testo → ${compagno.nome}", testo.take(90))
+                Diario.annota(this, true, t("Text → {peer}", "peer" to compagno.nome), testo.take(90))
             } else {
                 CodaUscita.mettiTesto(a, testo)
-                Diario.annota(this, true, "Testo in coda per ${compagno.nome}", "non risponde")
+                Diario.annota(this, true, t("Text queued for {peer}", "peer" to compagno.nome), t("not answering"))
             }
         }
     }
@@ -353,14 +360,21 @@ class PonteService : Service() {
                 }
                 StatoPonte.finePassaggio(a)
                 if (riuscito) {
-                    Diario.annota(this, true, "$nome → ${compagno.nome}", misura(dimensione))
+                    Diario.annota(
+                        this,
+                        true,
+                        t("{name} → {peer}", "name" to nome, "peer" to compagno.nome),
+                        misura(dimensione),
+                    )
                 } else {
                     // Non risponde: si mette in coda. Attenzione, il permesso su
                     // questo Uri vive quanto il servizio: se l'app viene chiusa
                     // prima che il compagno passi a ritirare, la voce non si
                     // potrà più aprire. È il prezzo di non copiare i file.
                     CodaUscita.mettiFile(a, nome, tipoDi(uri, nome), dimensione, uri)
-                    Diario.annota(this, true, "$nome in coda per ${compagno.nome}", "non risponde")
+                    Diario.annota(this, true, t("{name} queued for {peer}", "name" to nome, "peer" to compagno.nome),
+                        t("not answering"),
+                    )
                 }
             }
         }
@@ -406,8 +420,8 @@ class PonteService : Service() {
         val scelto = Compagni.scelto(this)
         if (scelto == null || scelto.id != compagno.id) return   // la UI guarda quello scelto
         val stato = when {
-            !collegato -> "non trovo ${compagno.nome}"
-            Rete.passaDalCavo(compagno.id) -> "collegato a ${compagno.nome} col cavo"
+            !collegato -> t("cannot find {peer}", "peer" to compagno.nome)
+            Rete.passaDalCavo(compagno.id) -> t("connected to {peer} over the cable", "peer" to compagno.nome)
             else -> "collegato a ${compagno.nome}"
         }
         if (StatoPonte.testo != stato) {

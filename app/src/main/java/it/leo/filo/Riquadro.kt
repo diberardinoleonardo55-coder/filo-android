@@ -17,6 +17,7 @@ import android.service.quicksettings.TileService
 class Riquadro : TileService() {
 
     override fun onStartListening() {
+        Testi.collega(this)
         super.onStartListening()
         qsTile?.apply {
             state = if (Compagni.quanti(this@Riquadro) > 0) Tile.STATE_INACTIVE else Tile.STATE_UNAVAILABLE

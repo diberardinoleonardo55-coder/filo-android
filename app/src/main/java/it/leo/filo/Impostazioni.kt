@@ -33,4 +33,11 @@ object Impostazioni {
 
     fun impostaRisposta(c: Context, acceso: Boolean) =
         prefs(c).edit().putBoolean("servitore", acceso).apply()
+
+    /** La lingua dell'interfaccia; vedi [Testi]. */
+    fun lingua(c: Context): String = prefs(c).getString("lingua", Testi.PREDEFINITA)
+        ?: Testi.PREDEFINITA
+
+    fun impostaLingua(c: Context, codice: String) =
+        prefs(c).edit().putString("lingua", codice).apply()
 }

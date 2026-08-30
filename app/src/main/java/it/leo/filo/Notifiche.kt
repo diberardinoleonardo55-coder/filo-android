@@ -8,14 +8,15 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
 import android.net.Uri
+import it.leo.filo.Testi.t
 
 /**
  * Canali e costruzione delle notifiche.
  *
  * Da Android 10 un'applicazione in secondo piano non puo' leggere ne' scrivere
  * gli appunti: il testo ricevuto viene quindi presentato come notifica con
- * l'azione "Copia", e la richiesta di appunti come notifica con l'azione
- * "Manda". Entrambe aprono [AppuntiActivity], che ha il fuoco e puo' operare
+ * l'azione t("Copy"), e la richiesta di appunti come notifica con l'azione
+ * t("Send"). Entrambe aprono [AppuntiActivity], che ha il fuoco e puo' operare
  * sugli appunti.
  */
 object Notifiche {
@@ -75,7 +76,7 @@ object Notifiche {
             .addAction(
                 Notification.Action.Builder(
                     Icon.createWithResource(c, R.drawable.ic_filo),
-                    "Copia",
+                    t("Copy"),
                     PendingIntent.getActivity(c, prossimo(), copia, bandiere()),
                 ).build()
             )
@@ -91,14 +92,14 @@ object Notifiche {
         }
         val n = Notification.Builder(c, CANALE_COSE)
             .setSmallIcon(R.drawable.ic_filo)
-            .setContentTitle("$daChi chiede i tuoi appunti")
-            .setContentText("Tocca per mandarglieli")
+            .setContentTitle(t("{name} is asking for your clipboard", "name" to daChi))
+            .setContentText(t("Tap to send it"))
             .setAutoCancel(true)
             .setContentIntent(PendingIntent.getActivity(c, prossimo(), manda, bandiere()))
             .addAction(
                 Notification.Action.Builder(
                     Icon.createWithResource(c, R.drawable.ic_filo),
-                    "Manda",
+                    t("Send"),
                     PendingIntent.getActivity(c, prossimo(), manda, bandiere()),
                 ).build()
             )

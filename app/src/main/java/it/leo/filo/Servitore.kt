@@ -13,6 +13,7 @@ import java.net.ServerSocket
 import java.net.Socket
 import java.util.concurrent.Executors
 import javax.net.ssl.SSLServerSocket
+import it.leo.filo.Testi.t
 
 /**
  * Lato server: HTTPS, un token per dispositivo abbinato, otto endpoint.
@@ -202,7 +203,12 @@ class Servitore(private val contesto: Context, private val porta: Int = 8787) {
             metodo == "POST" && primo == "carica" -> carica(compagno, intestazioni, dentro, fuori)
             metodo == "POST" && primo == "appunti" -> {
                 val testo = String(corpo(intestazioni, dentro), Charsets.UTF_8)
-                Diario.annota(contesto, false, "Testo da ${compagno.nome}", testo.take(90))
+                Diario.annota(
+                    contesto,
+                    false,
+                    t("Text from {peer}", "peer" to compagno.nome),
+                    testo.take(90),
+                )
                 // Scrivere negli appunti da qui non si può: da Android 10 serve
                 // avere il fuoco. Quindi diventa una notifica da toccare.
                 Notifiche.testoArrivato(contesto, testo)
@@ -255,7 +261,7 @@ class Servitore(private val contesto: Context, private val porta: Int = 8787) {
             tokenUscita = richiesta.optString("token"),  // me l'ha dato lui
             tokenEntrata = tokenPerMe,
         )
-        Diario.annota(contesto, false, "Abbinato: ${compagno.nome}")
+        Diario.annota(contesto, false, t("Paired: {name}", "name" to compagno.nome))
         json(fuori, cartaDiIdentita(contesto).put("token", tokenPerMe))
     }
 
@@ -306,7 +312,12 @@ class Servitore(private val contesto: Context, private val porta: Int = 8787) {
         }
         fuori.flush()
         StatoPonte.finePassaggio(compagno.id)
-        Diario.annota(contesto, true, "${voce.nome} → ${compagno.nome}", misura(voce.dimensione))
+        Diario.annota(
+            contesto,
+            true,
+            t("{name} → {peer}", "name" to voce.nome, "peer" to compagno.nome),
+            misura(voce.dimensione),
+        )
     }
 
     private fun carica(
@@ -333,10 +344,15 @@ class Servitore(private val contesto: Context, private val porta: Int = 8787) {
         }
         StatoPonte.finePassaggio(compagno.id)
         if (salvato == null) {
-            Diario.annota(contesto, false, "Non riesco a salvare $nome")
+            Diario.annota(contesto, false, t("Cannot save {name}", "name" to nome))
             return json(fuori, JSONObject().put("errore", "non salvato"), 500)
         }
-        Diario.annota(contesto, false, "$nome ← ${compagno.nome}", salvato.dove)
+        Diario.annota(
+            contesto,
+            false,
+            t("{name} ← {peer}", "name" to nome, "peer" to compagno.nome),
+            salvato.dove,
+        )
         Notifiche.fileArrivato(contesto, nome, salvato.dove, salvato.uri, indovinaMime(nome, mime))
         json(fuori, JSONObject().put("ok", true).put("byte", scritti))
     }

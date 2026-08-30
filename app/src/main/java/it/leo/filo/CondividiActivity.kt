@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
+import it.leo.filo.Testi.t
 
 /**
  * Voce dell'applicazione nel menu Condividi di sistema.
@@ -17,9 +18,10 @@ class CondividiActivity : Activity() {
 
     override fun onCreate(salvato: Bundle?) {
         super.onCreate(salvato)
+        Testi.collega(this)
 
         if (Compagni.quanti(this) == 0) {
-            Toast.makeText(this, "Filo: prima abbina un dispositivo", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, t("Filo: pair a device first"), Toast.LENGTH_LONG).show()
             startActivity(Intent(this, MainActivity::class.java))
             finish()
             return
@@ -44,10 +46,10 @@ class CondividiActivity : Activity() {
 
             !testo.isNullOrEmpty() -> {
                 PonteService.mandaTesto(this, testo)
-                Toast.makeText(this, "Mando il testo…", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, t("Sending the text…"), Toast.LENGTH_SHORT).show()
             }
 
-            else -> Toast.makeText(this, "Filo: non c'e' niente da mandare", Toast.LENGTH_SHORT).show()
+            else -> Toast.makeText(this, t("Filo: there is nothing to send"), Toast.LENGTH_SHORT).show()
         }
 
         finish()
