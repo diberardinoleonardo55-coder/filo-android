@@ -15,7 +15,6 @@ import java.security.cert.X509Certificate
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
 import javax.net.ssl.X509TrustManager
-import it.leo.filo.Testi.t
 
 /**
  * Lato client: chiamate verso un dispositivo abbinato.
@@ -214,7 +213,7 @@ object Rete {
                 tokenUscita = sua.getString("token"),  // quello che presento io
                 tokenEntrata = mioToken,
             )
-            Diario.annota(c, false, t("Paired: {name}", "name" to compagno.nome))
+            Diario.annota(c, false, Testi.t("Paired: {name}", "name" to compagno.nome))
             scordaIndirizzi()
             compagno
         } catch (e: Exception) {

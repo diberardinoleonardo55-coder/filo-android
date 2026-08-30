@@ -17,7 +17,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import java.io.File
 import java.util.concurrent.Executors
-import it.leo.filo.Testi.t
 
 /**
  * Lo stato del ponte, in chiaro per la UI.
@@ -268,7 +267,7 @@ class PonteService : Service() {
     private fun ritira(compagno: Compagni.Compagno, voce: Rete.Voce): Boolean = when (voce.tipo) {
         "testo" -> {
             val testo = voce.testo ?: ""
-            Diario.annota(this, false, t("Text from {peer}", "peer" to compagno.nome), testo.take(90))
+            Diario.annota(this, false, Testi.t("Text from {peer}", "peer" to compagno.nome), testo.take(90))
             if (voce.richiesto) {
                 // L'hai chiesto tu un istante fa dall'app: se l'app è ancora
                 // davanti, questa apre il ponte invisibile e copia subito. Se
@@ -311,13 +310,13 @@ class PonteService : Service() {
         }
         StatoPonte.finePassaggio(compagno.id)
         return if (salvato == null) {
-            Diario.annota(this, false, t("Cannot save {name}", "name" to voce.nome))
+            Diario.annota(this, false, Testi.t("Cannot save {name}", "name" to voce.nome))
             false
         } else {
             Diario.annota(
                 this,
                 false,
-                t("{name} ← {peer}", "name" to voce.nome, "peer" to compagno.nome),
+                Testi.t("{name} ← {peer}", "name" to voce.nome, "peer" to compagno.nome),
                 salvato.dove,
             )
             Notifiche.fileArrivato(this, voce.nome, salvato.dove, salvato.uri, voce.mime)
@@ -334,10 +333,10 @@ class PonteService : Service() {
             // Prima si prova a spingerlo: se risponde adesso, arriva adesso.
             // Se non risponde resta in coda e se lo prenderà quando torna.
             if (Rete.spingiTesto(this, compagno, testo)) {
-                Diario.annota(this, true, t("Text → {peer}", "peer" to compagno.nome), testo.take(90))
+                Diario.annota(this, true, Testi.t("Text → {peer}", "peer" to compagno.nome), testo.take(90))
             } else {
                 CodaUscita.mettiTesto(a, testo)
-                Diario.annota(this, true, t("Text queued for {peer}", "peer" to compagno.nome), t("not answering"))
+                Diario.annota(this, true, Testi.t("Text queued for {peer}", "peer" to compagno.nome), Testi.t("not answering"))
             }
         }
     }
@@ -363,7 +362,7 @@ class PonteService : Service() {
                     Diario.annota(
                         this,
                         true,
-                        t("{name} → {peer}", "name" to nome, "peer" to compagno.nome),
+                        Testi.t("{name} → {peer}", "name" to nome, "peer" to compagno.nome),
                         misura(dimensione),
                     )
                 } else {
@@ -372,8 +371,8 @@ class PonteService : Service() {
                     // prima che il compagno passi a ritirare, la voce non si
                     // potrà più aprire. È il prezzo di non copiare i file.
                     CodaUscita.mettiFile(a, nome, tipoDi(uri, nome), dimensione, uri)
-                    Diario.annota(this, true, t("{name} queued for {peer}", "name" to nome, "peer" to compagno.nome),
-                        t("not answering"),
+                    Diario.annota(this, true, Testi.t("{name} queued for {peer}", "name" to nome, "peer" to compagno.nome),
+                        Testi.t("not answering"),
                     )
                 }
             }
@@ -420,8 +419,8 @@ class PonteService : Service() {
         val scelto = Compagni.scelto(this)
         if (scelto == null || scelto.id != compagno.id) return   // la UI guarda quello scelto
         val stato = when {
-            !collegato -> t("cannot find {peer}", "peer" to compagno.nome)
-            Rete.passaDalCavo(compagno.id) -> t("connected to {peer} over the cable", "peer" to compagno.nome)
+            !collegato -> Testi.t("cannot find {peer}", "peer" to compagno.nome)
+            Rete.passaDalCavo(compagno.id) -> Testi.t("connected to {peer} over the cable", "peer" to compagno.nome)
             else -> "collegato a ${compagno.nome}"
         }
         if (StatoPonte.testo != stato) {

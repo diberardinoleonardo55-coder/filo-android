@@ -65,7 +65,6 @@ import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import it.leo.filo.Testi.t
 
 /**
  * L'unica schermata dell'app.
@@ -214,14 +213,14 @@ private fun Casa(onAbbina: () -> Unit) {
                 )
                 DropdownMenu(expanded = menuAperto, onDismissRequest = { menuAperto = false }) {
                     DropdownMenuItem(
-                        text = { Text(t("Pair a device")) },
+                        text = { Text(Testi.t("Pair a device")) },
                         onClick = {
                             menuAperto = false
                             onAbbina()
                         },
                     )
                     DropdownMenuItem(
-                        text = { Text(if (ponte) t("Stay connected: yes") else t("Stay connected: no")) },
+                        text = { Text(if (ponte) Testi.t("Stay connected: yes") else Testi.t("Stay connected: no")) },
                         onClick = {
                             ponte = !ponte
                             Impostazioni.impostaPonte(contesto, ponte)
@@ -231,7 +230,7 @@ private fun Casa(onAbbina: () -> Unit) {
                     )
                     DropdownMenuItem(
                         text = {
-                            Text(if (risponde) t("Answer calls: yes") else t("Answer calls: no"))
+                            Text(if (risponde) Testi.t("Answer calls: yes") else Testi.t("Answer calls: no"))
                         },
                         onClick = {
                             risponde = !risponde
@@ -242,7 +241,7 @@ private fun Casa(onAbbina: () -> Unit) {
                     )
                     HorizontalDivider(color = Carta)
                     DropdownMenuItem(
-                        text = { Text(t("Language"), color = Tenue, fontSize = 12.sp) },
+                        text = { Text(Testi.t("Language"), color = Tenue, fontSize = 12.sp) },
                         onClick = {},
                         enabled = false,
                     )
@@ -263,7 +262,7 @@ private fun Casa(onAbbina: () -> Unit) {
 
                     scelto?.let { c ->
                         DropdownMenuItem(
-                            text = { Text(t("Unpair {name}", "name" to c.nome)) },
+                            text = { Text(Testi.t("Unpair {name}", "name" to c.nome)) },
                             onClick = {
                                 menuAperto = false
                                 Compagni.dimentica(contesto, c.id)
@@ -298,21 +297,21 @@ private fun Casa(onAbbina: () -> Unit) {
         if (inCorso != null) {
             val p = inCorso.value
             val conChi = compagni.firstOrNull { it.id == inCorso.key }?.nome ?: ""
-            titolo = (if (p.versoIlCompagno) t("Sending ") else t("Receiving ")) + p.nome
+            titolo = (if (p.versoIlCompagno) Testi.t("Sending ") else Testi.t("Receiving ")) + p.nome
             sotto = (
                 if (p.totale > 0)
-                    t("{done} of {total}", "done" to misura(p.fatti), "total" to misura(p.totale))
+                    Testi.t("{done} of {total}", "done" to misura(p.fatti), "total" to misura(p.totale))
                 else misura(p.fatti)
             ) +
                 (if (conChi.isNotEmpty()) "  ·  $conChi" else "")
         } else {
-            titolo = scelto?.nome ?: t("No device")
+            titolo = scelto?.nome ?: Testi.t("No device")
             sotto = when {
-                scelto == null -> t("Pair one to get started")
-                StatoPonte.collegato && StatoPonte.viaCavo -> t("connected over the USB cable")
-                StatoPonte.collegato -> t("connected")
-                else -> t("not answering — it must be on the same network")
-            } + (if (compagni.size > 1) t("  ·  tap another one to talk to it") else "")
+                scelto == null -> Testi.t("Pair one to get started")
+                StatoPonte.collegato && StatoPonte.viaCavo -> Testi.t("connected over the USB cable")
+                StatoPonte.collegato -> Testi.t("connected")
+                else -> Testi.t("not answering — it must be on the same network")
+            } + (if (compagni.size > 1) Testi.t("  ·  tap another one to talk to it") else "")
         }
 
         Text(
@@ -342,8 +341,8 @@ private fun Casa(onAbbina: () -> Unit) {
 
         val aChi = scelto?.nome ?: ""
         Grosso(
-            if (aChi.isEmpty()) t("Send clipboard")
-            else t("Send clipboard to {name}", "name" to aChi),
+            if (aChi.isEmpty()) Testi.t("Send clipboard")
+            else Testi.t("Send clipboard to {name}", "name" to aChi),
             principale = true,
         ) {
             contesto.startActivity(
@@ -355,15 +354,15 @@ private fun Casa(onAbbina: () -> Unit) {
         }
         Spacer(Modifier.height(10.dp))
         Grosso(
-            if (aChi.isEmpty()) t("Send photos, videos or files")
-            else t("Send files to {name}", "name" to aChi)
+            if (aChi.isEmpty()) Testi.t("Send photos, videos or files")
+            else Testi.t("Send files to {name}", "name" to aChi)
         ) {
             scegliFile.launch("*/*")
         }
         Spacer(Modifier.height(14.dp))
         Text(
-            if (aChi.isEmpty()) t("Ask for clipboard")
-            else t("Ask {name} for the clipboard", "name" to aChi),
+            if (aChi.isEmpty()) Testi.t("Ask for clipboard")
+            else Testi.t("Ask {name} for the clipboard", "name" to aChi),
             color = Tenue,
             fontSize = 13.sp,
             textAlign = TextAlign.Center,
@@ -374,8 +373,8 @@ private fun Casa(onAbbina: () -> Unit) {
                     val c = scelto ?: return@clickable
                     giro.launch {
                         val riuscito = withContext(Dispatchers.IO) { Rete.chiediAppunti(contesto, c) }
-                        soffio = if (riuscito) t("Asked {name}", "name" to c.nome)
-                        else t("{name} is not answering", "name" to c.nome)
+                        soffio = if (riuscito) Testi.t("Asked {name}", "name" to c.nome)
+                        else Testi.t("{name} is not answering", "name" to c.nome)
                     }
                 }
                 .padding(vertical = 10.dp),
@@ -386,7 +385,7 @@ private fun Casa(onAbbina: () -> Unit) {
         Box(Modifier.weight(1f)) {
             if (voci.isEmpty()) {
                 Text(
-                    t("What goes through shows up here."),
+                    Testi.t("What goes through shows up here."),
                     color = Tenue.copy(alpha = 0.7f),
                     fontSize = 12.sp,
                 )
@@ -465,7 +464,7 @@ private fun Abbinamento(primoInAssoluto: Boolean, onFatto: () -> Unit) {
     ) {
         Spacer(Modifier.height(30.dp))
         Text(
-            if (primoInAssoluto) t("Let's connect Filo") else t("Pair a device"),
+            if (primoInAssoluto) Testi.t("Let's connect Filo") else Testi.t("Pair a device"),
             color = Testo,
             fontSize = 24.sp,
             textAlign = TextAlign.Center,
@@ -477,13 +476,13 @@ private fun Abbinamento(primoInAssoluto: Boolean, onFatto: () -> Unit) {
         if (pc == null) {
             Scheda {
                 Text(
-                    t("On the other device open Filo, tap Search and type:"),
+                    Testi.t("On the other device open Filo, tap Search and type:"),
                     color = Tenue, fontSize = 13.sp, textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    if (restano > 0) codice.toCharArray().joinToString(" ") else t("expired"),
+                    if (restano > 0) codice.toCharArray().joinToString(" ") else Testi.t("expired"),
                     color = if (restano > 0) Accento else Tenue,
                     fontSize = 30.sp,
                     fontWeight = FontWeight.Bold,
@@ -493,12 +492,12 @@ private fun Abbinamento(primoInAssoluto: Boolean, onFatto: () -> Unit) {
                 Spacer(Modifier.height(6.dp))
                 Text(
                     if (restano > 0)
-                        t(
+                        Testi.t(
                             "expires in {minutes}:{seconds}",
                             "minutes" to restano / 60,
                             "seconds" to "%02d".format(restano % 60),
                         )
-                    else t("tap for a new code"),
+                    else Testi.t("tap for a new code"),
                     color = Tenue, fontSize = 11.sp, textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -510,8 +509,8 @@ private fun Abbinamento(primoInAssoluto: Boolean, onFatto: () -> Unit) {
                 if (!StatoPonte.rispondeAncheLui) {
                     Spacer(Modifier.height(10.dp))
                     Text(
-                        t("This phone cannot open the port: use the opposite direction, ") +
-                            t("search for the other device yourself."),
+                        Testi.t("This phone cannot open the port: use the opposite direction, ") +
+                            Testi.t("search for the other device yourself."),
                         color = Ambra, fontSize = 11.sp, textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -520,13 +519,13 @@ private fun Abbinamento(primoInAssoluto: Boolean, onFatto: () -> Unit) {
 
             Spacer(Modifier.height(24.dp))
             Text(
-                t("or"), color = Tenue, fontSize = 12.sp, textAlign = TextAlign.Center,
+                Testi.t("or"), color = Tenue, fontSize = 12.sp, textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(12.dp))
 
             Grosso(
-                if (cercando) t("Searching…") else t("Search for a device"),
+                if (cercando) Testi.t("Searching…") else Testi.t("Search for a device"),
                 principale = true,
             ) {
                 if (cercando) return@Grosso
@@ -538,8 +537,8 @@ private fun Abbinamento(primoInAssoluto: Boolean, onFatto: () -> Unit) {
                     trovati = visti.filter { it.optString("id") !in gia }
                     cercando = false
                     if (trovati.isEmpty()) {
-                        messaggio = t("Nobody in sight. You must be on the same Wi-Fi network, ") +
-                            t("and Filo must be open on the other device.")
+                        messaggio = Testi.t("Nobody in sight. You must be on the same Wi-Fi network, ") +
+                            Testi.t("and Filo must be open on the other device.")
                     }
                 }
             }
@@ -549,7 +548,7 @@ private fun Abbinamento(primoInAssoluto: Boolean, onFatto: () -> Unit) {
                 Scheda(onClick = { scelto = carta }) {
                     Text(carta.optString("nome", "?"), color = Testo, fontSize = 17.sp)
                     Text(
-                        if (carta.optString("tipo") == "pc") t("computer") else t("phone"),
+                        if (carta.optString("tipo") == "pc") Testi.t("computer") else Testi.t("phone"),
                         color = Tenue, fontSize = 12.sp,
                     )
                 }
@@ -562,7 +561,7 @@ private fun Abbinamento(primoInAssoluto: Boolean, onFatto: () -> Unit) {
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                t("Type the six digits it shows."),
+                Testi.t("Type the six digits it shows."),
                 color = Tenue, fontSize = 13.sp, textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -582,9 +581,9 @@ private fun Abbinamento(primoInAssoluto: Boolean, onFatto: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(16.dp))
-            Grosso(t("Pair"), principale = true) {
+            Grosso(Testi.t("Pair"), principale = true) {
                 if (scritto.length != 6) {
-                    messaggio = t("The code has six digits.")
+                    messaggio = Testi.t("The code has six digits.")
                     return@Grosso
                 }
                 messaggio = ""
@@ -593,8 +592,8 @@ private fun Abbinamento(primoInAssoluto: Boolean, onFatto: () -> Unit) {
                         Rete.abbina(contesto, pc, scritto)
                     }
                     if (compagno == null) {
-                        messaggio = t("Code rejected. On the other device it expires after three ") +
-                            t("minutes: bring it up again and try once more.")
+                        messaggio = Testi.t("Code rejected. On the other device it expires after three ") +
+                            Testi.t("minutes: bring it up again and try once more.")
                     } else {
                         PonteService.sveglia(contesto)
                         onFatto()
@@ -602,7 +601,7 @@ private fun Abbinamento(primoInAssoluto: Boolean, onFatto: () -> Unit) {
                 }
             }
             Spacer(Modifier.height(10.dp))
-            Sottile(t("Choose another one")) {
+            Sottile(Testi.t("Choose another one")) {
                 scelto = null
                 scritto = ""
             }
@@ -610,7 +609,7 @@ private fun Abbinamento(primoInAssoluto: Boolean, onFatto: () -> Unit) {
 
         if (!primoInAssoluto) {
             Spacer(Modifier.height(16.dp))
-            Sottile(t("Never mind")) { onFatto() }
+            Sottile(Testi.t("Never mind")) { onFatto() }
         }
 
         if (messaggio.isNotEmpty()) {

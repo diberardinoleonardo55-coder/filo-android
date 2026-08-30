@@ -6,7 +6,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
-import it.leo.filo.Testi.t
 
 /**
  * Attivita' senza interfaccia per l'accesso agli appunti.
@@ -51,14 +50,14 @@ class AppuntiActivity : Activity() {
     private fun leggi() {
         val a = intent?.getStringExtra(EXTRA_A) ?: Compagni.scelto(this)?.id
         if (a == null) {
-            avvisa(t("Filo: pair a device first"))
+            avvisa(Testi.t("Filo: pair a device first"))
             return
         }
         val appunti = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
         val pezzo = appunti?.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)
         val testo = pezzo?.coerceToText(this)?.toString().orEmpty()
         if (testo.isEmpty()) {
-            avvisa(t("The clipboard is empty"))
+            avvisa(Testi.t("The clipboard is empty"))
             return
         }
         PonteService.mandaTesto(this, testo, a)

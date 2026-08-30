@@ -3,7 +3,7 @@
 
     python strumenti/controlla_testi.py
 
-Il compilatore non puo' accorgersi di una chiave scritta male: `t("...")`
+Il compilatore non puo' accorgersi di una chiave scritta male: `Testi.t("...")`
 accetta qualsiasi stringa e, se non la trova, restituisce la chiave stessa.
 Il difetto si vedrebbe solo passando all'italiano e leggendo una frase inglese
 in mezzo alle altre.

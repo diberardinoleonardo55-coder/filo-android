@@ -13,7 +13,6 @@ import java.net.ServerSocket
 import java.net.Socket
 import java.util.concurrent.Executors
 import javax.net.ssl.SSLServerSocket
-import it.leo.filo.Testi.t
 
 /**
  * Lato server: HTTPS, un token per dispositivo abbinato, otto endpoint.
@@ -206,7 +205,7 @@ class Servitore(private val contesto: Context, private val porta: Int = 8787) {
                 Diario.annota(
                     contesto,
                     false,
-                    t("Text from {peer}", "peer" to compagno.nome),
+                    Testi.t("Text from {peer}", "peer" to compagno.nome),
                     testo.take(90),
                 )
                 // Scrivere negli appunti da qui non si può: da Android 10 serve
@@ -261,7 +260,7 @@ class Servitore(private val contesto: Context, private val porta: Int = 8787) {
             tokenUscita = richiesta.optString("token"),  // me l'ha dato lui
             tokenEntrata = tokenPerMe,
         )
-        Diario.annota(contesto, false, t("Paired: {name}", "name" to compagno.nome))
+        Diario.annota(contesto, false, Testi.t("Paired: {name}", "name" to compagno.nome))
         json(fuori, cartaDiIdentita(contesto).put("token", tokenPerMe))
     }
 
@@ -315,7 +314,7 @@ class Servitore(private val contesto: Context, private val porta: Int = 8787) {
         Diario.annota(
             contesto,
             true,
-            t("{name} → {peer}", "name" to voce.nome, "peer" to compagno.nome),
+            Testi.t("{name} → {peer}", "name" to voce.nome, "peer" to compagno.nome),
             misura(voce.dimensione),
         )
     }
@@ -344,13 +343,13 @@ class Servitore(private val contesto: Context, private val porta: Int = 8787) {
         }
         StatoPonte.finePassaggio(compagno.id)
         if (salvato == null) {
-            Diario.annota(contesto, false, t("Cannot save {name}", "name" to nome))
+            Diario.annota(contesto, false, Testi.t("Cannot save {name}", "name" to nome))
             return json(fuori, JSONObject().put("errore", "non salvato"), 500)
         }
         Diario.annota(
             contesto,
             false,
-            t("{name} ← {peer}", "name" to nome, "peer" to compagno.nome),
+            Testi.t("{name} ← {peer}", "name" to nome, "peer" to compagno.nome),
             salvato.dove,
         )
         Notifiche.fileArrivato(contesto, nome, salvato.dove, salvato.uri, indovinaMime(nome, mime))
