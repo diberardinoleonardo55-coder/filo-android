@@ -40,9 +40,19 @@ dizionario = {chiave: valore for chiave, valore in grezze}
 if len(dizionario) < 20:
     guai.append(f"il dizionario sembra vuoto: solo {len(dizionario)} voci lette")
 
+# Una traduzione identica alla chiave inglese di solito e' una traduzione
+# perduta: compare in inglese in mezzo alle altre e nessun altro controllo se
+# ne accorge. Restano fuori le frasi fatte di soli simboli e segnaposto.
+UGUALI_PER_DAVVERO = {"en", "it", "computer"}
+
 for chiave, valore in dizionario.items():
     if set(SEGNAPOSTO.findall(chiave)) != set(SEGNAPOSTO.findall(valore)):
         guai.append(f"segnaposto diversi: {chiave!r} -> {valore!r}")
+    if chiave == valore and chiave not in UGUALI_PER_DAVVERO:
+        senza = SEGNAPOSTO.sub("", chiave).strip()
+        # se tolti i segnaposto non restano lettere, e' una frase di soli simboli
+        if any(c.isalpha() for c in senza):
+            guai.append(f"traduzione rimasta in inglese: {chiave!r}")
 
 # --- le chiavi usate nei sorgenti --------------------------------------------
 
